@@ -66,3 +66,32 @@ def write_markdown(report: dict, path: str | Path) -> None:
 
 
     path.write_text("".join(lines), encoding="utf-8")
+
+def render_markdown(report: dict) -> str:
+    rows = report["summary"]["rows"]
+    columns_count = report["summary"]["columns"]
+    cols = report["columns"]
+
+    lines = []
+
+    lines.append("# CSV Profiling Report\n\n")
+
+    lines.append("## Summary\n")
+    lines.append(f"- Rows: {rows:,}\n")
+    lines.append(f"- Columns: {columns_count:,}\n")
+    lines.append(f"- Rows (computed): **{report['n_rows']}**\n")
+    lines.append(f"- Columns (computed): **{report['n_cols']}**\n\n")
+
+    lines.append("## Columns\n\n")
+    lines.append("| name | type | missing | missing_pct | unique |\n")
+    lines.append("|---|---:|---:|---:|---:|\n")
+
+    for name, col in cols.items():
+        missing_pct = (col["missing"] / rows * 100) if rows > 0 else 0
+        lines.append(
+            f"| {name} | {col['type']} | {col['missing']} | {missing_pct:.1f}% | {col['unique']} |\n"
+        )
+
+    lines.append("\n")
+
+    return "".join(lines)
